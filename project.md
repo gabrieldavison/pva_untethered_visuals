@@ -25,3 +25,9 @@
     - This is used inside the sketch in place of a parameter.
       - e.g. `param(min,max,default) => () => slider value.
   - Might be nice to have a debugging function that starts logging the output to console for easy remapping
+
+## Tasks
+
+- Add two sketches to switcher
+- Move hydraP5Lib logic into switcher
+- Get it toggling between 2 sketches

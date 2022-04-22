@@ -5,32 +5,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./hydraP5Lib/style.css">
     <style>
         body {
             margin: 0;
             width:100vw;
             height: 100vh;
+            background-color: rgba(0, 0, 0, 0.702);
         }
         #sketch {
             width:100%;
             height:100%;
         }
+        #p5-wrapper {
+            display: none;
+        }
+        #hydra-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+
     </style>
+
 </head>
 <body>
-    <div id="sketch"></div>
+    <div id="sketch">
+    </div>
+   
     <script src="/lib/p5.js"></script>
+    <!-- Remember this is just a wrapper around tone.js -->
+    <script src="/lib/p5.sound.js"></script>
     <script src="/lib/hydra-synth.js"></script>
-    <script type="module">
-        import HydraP5Sketch from "./hydraP5Lib/index.js"
-        import {p5Sketch, hydraSketch} from './sketch.js'
-
-        window.onload = async () => {
-            const sketchCanvas = document.getElementById('sketch')
-            new HydraP5Sketch(sketchCanvas,p5Sketch);
-            hydraSketch()
-        }
-    </script>
+    <script src="/index.js" type="module"></script>
 </body>
 </html>
