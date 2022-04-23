@@ -425,37 +425,85 @@ export const rotatingSquares = () => {
   };
 
   const p5Sketch = (p) => {
-    const genSquares = (maxSize, num) => {
-      const chunk = maxSize / num;
-      const r = (acc, _v, i) => {
-        const size = (i + 1) * chunk;
-        const x = maxSize / 2 - 0.5 * size;
-        const y = maxSize / 2 - 0.5 * size;
-        return [...acc, { size, x, y, rot: 0.1 }];
-      };
-      return [...Array(num)].reduce(r, []);
-    };
-    const maxSize = 800;
-    let sqs = genSquares(maxSize, 10).reverse();
-    const offSet = maxSize / 2;
+    // Parameterize these
+
+    const maxSize = 1500;
+    const numSquares = 1000; // Up to 5000 looks nice
+    const rotSpeedMin = 0.0005; // can go up and down in factors of 10 but try and keep a big gap between them
+    const rotSpeedMax = 0.001;
+
+    let sqs;
+    let genSquares;
+
     p.setup = () => {
       let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
       cnv.id("p5-canvas");
       hydraInit(p);
+      p.rectMode(p.CENTER);
+      p.noStroke();
+
+      genSquares = (maxSize, num) => {
+        const chunk = maxSize / num;
+        const r = (acc, _v, i) => {
+          const size = (i + 1) * chunk;
+          const x = maxSize / 2 - 0.5 * size;
+          const y = maxSize / 2 - 0.5 * size;
+          return [...acc, { size, x, y, rot: p.random(0, 1) }];
+        };
+        return [...Array(num)].reduce(r, []);
+      };
+      sqs = genSquares(maxSize, numSquares).reverse();
     };
 
     p.draw = () => {
-      p.push();
-      p.translate(p.width / 2 - 7, p.height / 2 - offSet);
+      p.background(0);
       sqs.forEach((sq, i) => {
         p.push();
-        /// Not translating into correct place to rotate
-        p.translate(0.5 * sq.size, 0.5 * sq.size);
-        p.rotate(sq.rot * p.PI);
-        p.square(sq.x, sq.y, sq.size);
+        i % 2 === 0 ? p.fill(0) : 255;
+        p.translate(p.width / 2, p.height / 2);
+        p.rotate(sq.rot);
+        p.rect(0, 0, sq.size, sq.size);
         p.pop();
+
+        i % 2 === 0
+          ? (sqs[i].rot += p.random(rotSpeedMin, rotSpeedMax))
+          : (sqs[i].rot += p.random(-rotSpeedMax, -rotSpeedMin));
       });
-      p.pop();
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const galaxy = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const maxRad = 500;
+    const numCircles = 10;
+    const inc = maxRad / numCircles;
+    const numPoints = 100;
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.noLoop();
+    };
+    p.draw = () => {
+      p.translate(p.width / 2, p.height / 2);
+      for (let i = 0; i < numCircles; i++) {
+        for (let j = 0; j < numPoints; j++) {
+          const rad = (i + 1) * inc;
+          const a = p.random() * 2 * p.PI;
+          const r = rad * p.sqrt(p.random());
+          const x = r * p.cos(a);
+          const y = r * p.sin(a);
+          p.circle(x, y, 10);
+        }
+      }
     };
   };
 

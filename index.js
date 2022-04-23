@@ -32,7 +32,7 @@ document.addEventListener("keypress", (e) => {
       initScene(scenes.rotatingSquares);
       break;
     case "8":
-      initScene(scenes.audioInit);
+      initScene(scenes.galaxy);
       break;
     case "9":
       initScene(scenes.audioInit);
