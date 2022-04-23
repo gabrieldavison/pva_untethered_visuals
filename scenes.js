@@ -90,6 +90,100 @@ export const template = () => {
 };
 
 /// Helpers ///
+class MyAmp {
+  constructor(p5, p) {
+    this.p5 = p5;
+    this.p = p;
+    this.mic = new this.p5.AudioIn();
+    this.mic.start();
+    this.amp = new this.p5.Amplitude();
+  }
+  start() {
+    this.p.userStartAudio();
+    this.amp.setInput(this.mic);
+  }
+  getLevel() {
+    return this.amp.getLevel();
+  }
+}
+class MyRect {
+  constructor(p, x, y, maxWidth, maxHeight, numRects) {
+    this.p = p;
+    this.x = x;
+    this.y = y;
+    this.maxWidth = maxWidth;
+    this.maxHeight = maxHeight;
+    this.numRects = numRects;
+    this.chunkW = maxWidth / numRects;
+    this.chunkH = maxHeight / numRects;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.targetOffsetX = 0;
+    this.targetOffsetY = 0;
+  }
+  draw() {
+    for (let i = 0; i < this.numRects; i++) {
+      this.p.push();
+      this.p.translate(this.x, this.y);
+      for (let i = 0; i < this.numRects; i++) {
+        const w = this.chunkW * (i + 1);
+        const h = this.chunkH * (i + 1);
+        const offsetMult = this.p.map(i, 0, this.numRects, this.numRects, 0);
+        this.p.rect(
+          0 + offsetMult * this.offsetX,
+          0 + offsetMult * this.offsetY,
+          w,
+          h
+        );
+      }
+      this.p.pop();
+    }
+  }
+  setOffset(x, y) {
+    this.targetOffsetX = x;
+    this.targetOffsetY = y;
+  }
+  tick(interval) {
+    const dx = (this.targetOffsetX - this.offsetX) / interval;
+    const dy = (this.targetOffsetY - this.offsetY) / interval;
+    console.log(dx, dy);
+    this.offsetX += dx;
+    this.offsetY += dy;
+  }
+}
+class myCircle {
+  constructor(p, x, y, maxRad, numCircles) {
+    this.p = p;
+    this.x = x;
+    this.y = y;
+    this.tX = x;
+    this.tY = y;
+    this.maxRad = maxRad;
+    this.numCircles = numCircles;
+    this.chunk = maxRad / numCircles;
+  }
+
+  draw() {
+    this.p.push();
+    this.p.translate(this.x, this.y);
+    for (let i = 0; i < this.numCircles; i++) {
+      const s = this.chunk * (i + 1);
+      this.p.circle(0, 0, s);
+    }
+    this.p.pop();
+  }
+  move(x, y) {
+    this.tX = x;
+    this.tY = y;
+  }
+  tick(interval) {
+    const dx = (this.tX - this.x) / interval;
+    const dy = (this.tY - this.y) / interval;
+
+    this.x += dx;
+    this.y += dy;
+  }
+}
 
 class Wave {
   constructor(p, initSpeed = 0.05) {
@@ -563,5 +657,233 @@ export const galaxyWithAudioInput = () => {
     };
   };
 
+  return { hydraSketch, p5Sketch };
+};
+
+export const moireCircles = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const numCircles = 3;
+    const maxRad = 800;
+    const circleCount = 10;
+
+    let circles;
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+
+      p.noFill();
+      circles = [...Array(circleCount)].map(
+        () =>
+          new myCircle(
+            p,
+            p.random(0, p.width),
+            p.random(0, p.height),
+            maxRad,
+            numCircles
+          )
+      );
+      p.stroke(255);
+      p.strokeWeight(4);
+    };
+
+    p.draw = () => {
+      p.background(0);
+      circles.forEach((c) => c.draw());
+      circles.forEach((c) => c.tick(3000 / 60));
+    };
+
+    p.mousePressed = () => {
+      circles.forEach((c) =>
+        c.move(p.random(0, p.width), p.random(0, p.height))
+      );
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const moireCirclesWithAudioInput = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const numCircles = 3; //num circles inside each circle
+    const maxRad = 800;
+    const circleCount = 10; // num big circles
+    const thresh = 0.1;
+
+    let circles;
+    let mic, amp;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+
+      p.noFill();
+      circles = [...Array(circleCount)].map(
+        () =>
+          new myCircle(
+            p,
+            p.random(0, p.width),
+            p.random(0, p.height),
+            maxRad,
+            numCircles
+          )
+      );
+      p.stroke(255);
+      p.strokeWeight(4);
+
+      mic = new p5.AudioIn();
+      mic.start();
+      amp = new p5.Amplitude();
+    };
+
+    p.draw = () => {
+      p.background(0);
+      const level = amp.getLevel();
+      console.log(level);
+      if (level > thresh)
+        circles.forEach((c) =>
+          c.move(p.random(0, p.width), p.random(0, p.height))
+        );
+      circles.forEach((c) => c.draw());
+      circles.forEach((c) => c.tick(3000 / 60));
+    };
+
+    p.mousePressed = () => {
+      p.userStartAudio();
+      amp.setInput(mic);
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const squaresInSquares = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const cols = 1;
+    const rows = 1;
+    const numRects = 100;
+    const maxMovement = 100;
+    const triggerInterval = 30; //fps
+    const interval = 500; //ms
+
+    let rects;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.stroke(255);
+      p.noFill();
+      p.rectMode(p.CENTER);
+      const rectWidth = p.width / cols;
+      const rectHeight = p.height / rows;
+      rects = [...Array(rows)].map((_v, i) =>
+        [...Array(cols)].map((_v, j) => {
+          const multX = j;
+          const multY = i;
+          const x = multX * rectWidth + 0.5 * rectWidth;
+          const y = multY * rectHeight + 0.5 * rectHeight;
+          return new MyRect(p, x, y, rectWidth, rectHeight, numRects);
+        })
+      );
+    };
+    p.draw = () => {
+      p.background(0);
+      rects.forEach((row) => row.forEach((rect) => rect.draw()));
+      rects.forEach((row) => row.forEach((rect) => rect.tick(interval / 60)));
+      if (p.frameCount % triggerInterval === 0) {
+        rects.forEach((row) =>
+          row.forEach((rect) =>
+            rect.setOffset(p.random(-5, 5), p.random(-5, 5))
+          )
+        );
+      }
+    };
+    p.mousePressed = () => {
+      rects.forEach((row) =>
+        row.forEach((rect) =>
+          rect.setOffset(
+            p.random(-maxMovement, maxMovement),
+            p.random(-maxMovement, maxMovement)
+          )
+        )
+      );
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const squaresInSquaresAudioInput = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const cols = 1;
+    const rows = 1;
+    const numRects = 100;
+    const maxMovement = 100;
+    const triggerInterval = 30; //fps
+    const interval = 500; //ms
+
+    let rects;
+    let amp;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.stroke(255);
+      p.noFill();
+      p.rectMode(p.CENTER);
+      const rectWidth = p.width / cols;
+      const rectHeight = p.height / rows;
+      rects = [...Array(rows)].map((_v, i) =>
+        [...Array(cols)].map((_v, j) => {
+          const multX = j;
+          const multY = i;
+          const x = multX * rectWidth + 0.5 * rectWidth;
+          const y = multY * rectHeight + 0.5 * rectHeight;
+          return new MyRect(p, x, y, rectWidth, rectHeight, numRects);
+        })
+      );
+      amp = new MyAmp(p5, p);
+    };
+
+    const triggerMovement = () => {
+      rects.forEach((row) =>
+        row.forEach((rect) => rect.setOffset(p.random(-5, 5), p.random(-5, 5)))
+      );
+    };
+
+    p.draw = () => {
+      p.background(0);
+      rects.forEach((row) => row.forEach((rect) => rect.draw()));
+      rects.forEach((row) => row.forEach((rect) => rect.tick(interval / 60)));
+      // if (p.frameCount % triggerInterval === 0) {
+      //   triggerMovement();
+      // }
+      const level = amp.getLevel();
+      if (level > 0.1) {
+        triggerMovement();
+      }
+    };
+    p.mousePressed = () => {
+      console.log(amp);
+      amp.start();
+    };
+  };
   return { hydraSketch, p5Sketch };
 };

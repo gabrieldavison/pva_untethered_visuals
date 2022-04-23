@@ -38,7 +38,19 @@ document.addEventListener("keypress", (e) => {
       initScene(scenes.galaxyWithAudioInput);
       break;
     case "0":
-      initScene(scenes.audioInit);
+      initScene(scenes.moireCircles);
+      break;
+    case "q":
+      initScene(scenes.moireCirclesWithAudioInput);
+      break;
+    case "w":
+      initScene(scenes.squaresInSquares);
+      break;
+    case "e":
+      initScene(scenes.squaresInSquaresAudioInput);
+      break;
+    case "r":
+      initScene(scenes.moireCircles);
       break;
   }
 });
