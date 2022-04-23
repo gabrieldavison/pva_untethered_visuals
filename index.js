@@ -35,7 +35,7 @@ document.addEventListener("keypress", (e) => {
       initScene(scenes.galaxy);
       break;
     case "9":
-      initScene(scenes.audioInit);
+      initScene(scenes.galaxyWithAudioInput);
       break;
     case "0":
       initScene(scenes.audioInit);

@@ -477,22 +477,25 @@ export const rotatingSquares = () => {
 
 export const galaxy = () => {
   const hydraSketch = () => {
+    // src(s1).modulate(noise(10), 0.1).out(o0);
     src(s1).out(o0);
   };
 
   const p5Sketch = (p) => {
-    const maxRad = 500;
-    const numCircles = 10;
-    const inc = maxRad / numCircles;
-    const numPoints = 100;
-
+    const numPoints = 10;
+    const frameRate = 280;
     p.setup = () => {
       let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
       cnv.id("p5-canvas");
       hydraInit(p);
-      p.noLoop();
+      p.frameRate(frameRate);
+      p.noStroke();
     };
     p.draw = () => {
+      const numCircles = p.mouseX;
+      const maxRad = p.mouseX;
+      const inc = maxRad / numCircles;
+      p.background(0);
       p.translate(p.width / 2, p.height / 2);
       for (let i = 0; i < numCircles; i++) {
         for (let j = 0; j < numPoints; j++) {
@@ -501,9 +504,62 @@ export const galaxy = () => {
           const r = rad * p.sqrt(p.random());
           const x = r * p.cos(a);
           const y = r * p.sin(a);
-          p.circle(x, y, 10);
+          p.square(x, y, 3);
         }
       }
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const galaxyWithAudioInput = () => {
+  const hydraSketch = () => {
+    src(s1).modulate(noise(10), 0.1).out(o0);
+    // src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const numPoints = 10;
+    const frameRate = 280;
+    const ampMult = 5;
+    let mic, amp;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.frameRate(frameRate);
+      p.noStroke();
+      mic = new p5.AudioIn();
+      mic.start();
+      amp = new p5.Amplitude();
+    };
+    p.draw = () => {
+      const numCircles = p.map(
+        amp.getLevel() * ampMult,
+        0,
+        1 * ampMult,
+        50,
+        1000
+      );
+      const maxRad = p.map(amp.getLevel() * ampMult, 0, 1 * ampMult, 50, 1000);
+      const inc = maxRad / numCircles;
+      p.background(0);
+      p.translate(p.width / 2, p.height / 2);
+      for (let i = 0; i < numCircles; i++) {
+        for (let j = 0; j < numPoints; j++) {
+          const rad = (i + 1) * inc;
+          const a = p.random() * 2 * p.PI;
+          const r = rad * p.sqrt(p.random());
+          const x = r * p.cos(a);
+          const y = r * p.sin(a);
+          p.square(x, y, 3);
+        }
+      }
+    };
+    p.mousePressed = () => {
+      p.userStartAudio();
+      amp.setInput(mic);
     };
   };
 
