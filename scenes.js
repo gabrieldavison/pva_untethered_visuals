@@ -1,5 +1,5 @@
+import * as m from "./midi.js";
 // Templates
-
 const hydraInit = (p) => {
   p.pixelDensity(1);
 };
@@ -146,7 +146,6 @@ class MyRect {
   tick(interval) {
     const dx = (this.targetOffsetX - this.offsetX) / interval;
     const dy = (this.targetOffsetY - this.offsetY) / interval;
-    console.log(dx, dy);
     this.offsetX += dx;
     this.offsetY += dy;
   }
@@ -714,7 +713,7 @@ export const moireCirclesWithAudioInput = () => {
   };
 
   const p5Sketch = (p) => {
-    const numCircles = 3; //num circles inside each circle
+    const numCircles = 10; //num circles inside each circle
     const maxRad = 800;
     const circleCount = 10; // num big circles
     const thresh = 0.1;
@@ -748,7 +747,6 @@ export const moireCirclesWithAudioInput = () => {
     p.draw = () => {
       p.background(0);
       const level = amp.getLevel();
-      console.log(level);
       if (level > thresh)
         circles.forEach((c) =>
           c.move(p.random(0, p.width), p.random(0, p.height))
@@ -768,7 +766,9 @@ export const moireCirclesWithAudioInput = () => {
 
 export const squaresInSquares = () => {
   const hydraSketch = () => {
-    src(s1).out(o0);
+    src(s1)
+      .modulate(noise(5).modulate(osc(10)))
+      .out(o0);
   };
 
   const p5Sketch = (p) => {
@@ -881,9 +881,127 @@ export const squaresInSquaresAudioInput = () => {
       }
     };
     p.mousePressed = () => {
-      console.log(amp);
       amp.start();
     };
   };
+  return { hydraSketch, p5Sketch };
+};
+export const squaresInSquaresFeedback = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).saturate(0).out(o1);
+    src(s1).mult(src(o1).contrast(3), 0.5).contrast(2).out();
+  };
+
+  const p5Sketch = (p) => {
+    const cols = 5;
+    const rows = 5;
+    const numRects = 20;
+    const maxMovement = 100; // Maximum distance the squares will move
+    const triggerInterval = 30; //fps
+    const interval = 300; //ms
+
+    let rects;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.stroke(255);
+      p.noFill();
+      p.rectMode(p.CENTER);
+      const rectWidth = p.width / cols;
+      const rectHeight = p.height / rows;
+      rects = [...Array(rows)].map((_v, i) =>
+        [...Array(cols)].map((_v, j) => {
+          const multX = j;
+          const multY = i;
+          const x = multX * rectWidth + 0.5 * rectWidth;
+          const y = multY * rectHeight + 0.5 * rectHeight;
+          return new MyRect(p, x, y, rectWidth, rectHeight, numRects);
+        })
+      );
+    };
+    p.draw = () => {
+      p.background(0);
+      rects.forEach((row) => row.forEach((rect) => rect.draw()));
+      rects.forEach((row) => row.forEach((rect) => rect.tick(interval / 60)));
+      if (p.frameCount % triggerInterval === 0) {
+        rects.forEach((row) =>
+          row.forEach((rect) =>
+            rect.setOffset(p.random(-5, 5), p.random(-5, 5))
+          )
+        );
+      }
+    };
+    p.mousePressed = () => {
+      rects.forEach((row) =>
+        row.forEach((rect) =>
+          rect.setOffset(
+            p.random(-maxMovement, maxMovement),
+            p.random(-maxMovement, maxMovement)
+          )
+        )
+      );
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const moireCirclesWithFeedback = () => {
+  // This one has the circles moving on timer
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).saturate(0).out(o1);
+    src(s1).diff(o1).contrast(2).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const maxCircles = 25;
+    const maxRad = 1500;
+    const circleCount = 20;
+    const triggerInterval = 60; //fps
+
+    let circles;
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+
+      p.noFill();
+      circles = [...Array(circleCount)].map(
+        () =>
+          new myCircle(
+            p,
+            p.random(0, p.width),
+            p.random(0, p.height),
+            maxRad,
+            maxCircles
+          )
+      );
+      p.stroke(255);
+      p.strokeWeight(4);
+    };
+
+    p.draw = () => {
+      p.background(0);
+      circles.forEach((c) => c.draw());
+      circles.forEach((c) => c.tick(3000 / 60));
+      if (p.frameCount % triggerInterval === 0) {
+        circles.forEach((c) =>
+          c.move(p.random(0, p.width), p.random(0, p.height))
+        );
+      }
+      circles.forEach((c) => (c.numCircles = m.getSlider(6, 2, maxCircles)));
+    };
+
+    p.mousePressed = () => {
+      circles.forEach((c) =>
+        c.move(p.random(0, p.width), p.random(0, p.height))
+      );
+    };
+  };
+
   return { hydraSketch, p5Sketch };
 };
