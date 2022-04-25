@@ -121,3 +121,19 @@ export const genAddWaves =
       -1,
       1
     );
+
+export class Easer {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.tx = x;
+    this.ty = y;
+  }
+
+  tick(interval) {
+    const dx = (this.tx - this.x) / interval;
+    const dy = (this.ty - this.y) / interval;
+    this.x += dx;
+    this.y += dy;
+  }
+}
