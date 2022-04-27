@@ -18,6 +18,9 @@ m.setButton(2, () => initScene(scenes.twoBoxWithSpeedControlHydra));
 m.setButton(3, () => initScene(scenes.oneBoxWithAudioControl));
 m.setButton(4, () => initScene(scenes.oneBoxWithAudioControlHydra));
 m.setButton(5, () => initScene(scenes.fourBoxWithSpeedControl));
+m.setButton(6, () => initScene(scenes.fourBoxWithSpeedControlFeedbackAudio));
+m.setButton(7, () => initScene(scenes.fourBoxWithSpeedControlVideoInput));
+m.setButton(8, () => initScene(scenes.galaxyHydra));
 // // Stand in for midi controller
 // document.addEventListener("keypress", (e) => {
 //   switch (e.key) {

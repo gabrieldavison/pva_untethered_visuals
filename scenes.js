@@ -1,4 +1,5 @@
 import * as m from "./midi.js";
+import * as a from "./audio.js";
 import {
   MyAmp,
   MyRect,
@@ -200,8 +201,8 @@ export const oneBoxWithAudioControl = () => {
     const getInterval = () => m.getSlider(7, 1, 200);
 
     const e = new Easer(0, 0);
-    let mic, amp;
 
+    const amp = new a.MyAmp();
     p.setup = () => {
       let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
       cnv.id("p5-canvas");
@@ -209,9 +210,6 @@ export const oneBoxWithAudioControl = () => {
       p.fill(0);
 
       // Sets up Mic
-      mic = new p5.AudioIn();
-      mic.start();
-      amp = new p5.Amplitude();
       p.rectMode(p.CENTER);
     };
 
@@ -235,8 +233,7 @@ export const oneBoxWithAudioControl = () => {
       e.tick(Math.floor(interval));
     };
     p.mousePressed = () => {
-      p.userStartAudio();
-      amp.setInput(mic);
+      a.start();
       console.log("audio start");
     };
   };
@@ -262,8 +259,8 @@ export const oneBoxWithAudioControlHydra = () => {
     const getInterval = () => m.getSlider(7, 1, 200);
 
     const e = new Easer(0, 0);
-    let mic, amp;
-
+    // a.start();
+    const amp = new a.MyAmp();
     p.setup = () => {
       let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
       cnv.id("p5-canvas");
@@ -271,9 +268,9 @@ export const oneBoxWithAudioControlHydra = () => {
       p.fill(0);
 
       // Sets up Mic
-      mic = new p5.AudioIn();
-      mic.start();
-      amp = new p5.Amplitude();
+      // mic = new p5.AudioIn();
+      // mic.start();
+      // amp = new p5.Amplitude();
       p.rectMode(p.CENTER);
     };
 
@@ -297,8 +294,8 @@ export const oneBoxWithAudioControlHydra = () => {
       e.tick(Math.floor(interval));
     };
     p.mousePressed = () => {
-      p.userStartAudio();
-      amp.setInput(mic);
+      // p.userStartAudio();
+      // amp.setInput(mic);
       console.log("audio start");
     };
   };
@@ -441,5 +438,201 @@ export const fourBoxWithSpeedControlFeedback = () => {
       modWave.tick();
     };
   };
+  return { hydraSketch, p5Sketch };
+};
+
+export const fourBoxWithSpeedControlFeedbackAudio = () => {
+  const hydraSketch = () => {
+    src(s1).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    // Swap these out for midi functions
+    const getSpeed1 = () => m.getSlider(6, 0.01, 0.5);
+    const getSpeed2 = () => m.getSlider(7, 0.01, 0.5);
+    const getSpeed3 = () => m.getSlider(8, 0.01, 0.5);
+    const getSpeed4 = () => m.getSlider(9, 0.01, 0.5);
+    const addWaves = genAddWaves(p);
+
+    let wave1, wave2, wave3, wave4, modWave;
+
+    const amp = new a.MyAmpSplit();
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.fill(0);
+      wave1 = new Wave(p);
+      wave2 = new Wave(p);
+      wave3 = new Wave(p);
+      wave4 = new Wave(p);
+      modWave = new Wave(p, 0.1);
+      p.rectMode(p.CENTER);
+    };
+
+    p.draw = () => {
+      p.background(255);
+
+      // Set up offsets
+
+      const rectW = p.width / 2;
+      const rectH = p.height / 2;
+
+      const r1w = p.map(addWaves(wave1, modWave, 0), -1, 1, 0, rectW);
+      const r1h = p.map(addWaves(wave1, modWave, 0), -1, 1, 0, rectH);
+      const r2w = p.map(addWaves(wave2, modWave, 0), -1, 1, 0, rectW);
+      const r2h = p.map(addWaves(wave2, modWave, 0), -1, 1, 0, rectH);
+      const r3w = p.map(addWaves(wave3, modWave, 0), -1, 1, 0, rectW);
+      const r3h = p.map(addWaves(wave3, modWave, 0), -1, 1, 0, rectH);
+      const r4w = p.map(addWaves(wave4, modWave, 0), -1, 1, 0, rectW);
+      const r4h = p.map(addWaves(wave4, modWave, 0), -1, 1, 0, rectH);
+
+      const level1 = amp.getLevel1();
+      const level2 = amp.getLevel2();
+
+      const w1 = p.map(level1, 0, 1, 0, rectW);
+      const h1 = p.map(level1, 0, 1, 0, rectH);
+      const w2 = p.map(level2, 0, 1, 0, rectW);
+      const h2 = p.map(level2, 0, 1, 0, rectH);
+      // Draw rects
+      p.rect(rectW / 2, rectH / 2, w1, h1);
+      p.rect(rectW * 1.5, rectH / 2, w2, h2);
+      p.rect(rectW / 2, rectH * 1.5, w1, h1);
+      p.rect(rectW * 1.5, rectH * 1.5, w2, h2);
+
+      // Advance Waves
+      wave1.setSpeed(getSpeed1());
+      wave1.tick();
+      wave2.setSpeed(getSpeed2());
+      wave2.tick();
+      wave3.setSpeed(getSpeed3());
+      wave3.tick();
+      wave4.setSpeed(getSpeed4());
+      wave4.tick();
+      modWave.tick();
+    };
+
+    p.mousePressed = () => {
+      a.start();
+    };
+  };
+  return { hydraSketch, p5Sketch };
+};
+
+// This doesnt look good when the camera isn't feeding back
+// This does give some nice geometric patterns when the camera is feeding back
+export const fourBoxWithSpeedControlVideoInput = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).modulateHue(osc(10)).out(o1);
+    src(s1).diff(o1).contrast(2).saturate(0).out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    // Swap these out for midi functions
+    const getSpeed1 = () => m.getSlider(6, 0.01, 0.5);
+    const getSpeed2 = () => m.getSlider(7, 0.01, 0.5);
+    const getSpeed3 = () => m.getSlider(8, 0.01, 0.5);
+    const getSpeed4 = () => m.getSlider(9, 0.01, 0.5);
+    const addWaves = genAddWaves(p);
+
+    let wave1, wave2, wave3, wave4, modWave;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.fill(0);
+      wave1 = new Wave(p);
+      wave2 = new Wave(p);
+      wave3 = new Wave(p);
+      wave4 = new Wave(p);
+      modWave = new Wave(p, 0.1);
+      p.rectMode(p.CENTER);
+    };
+
+    p.draw = () => {
+      p.background(255);
+
+      // Set up offsets
+
+      const rectW = p.width / 2;
+      const rectH = p.height / 2;
+
+      const r1w = p.map(addWaves(wave1, modWave, 0), -1, 1, 0, rectW);
+      const r1h = p.map(addWaves(wave1, modWave, 0), -1, 1, 0, rectH);
+      const r2w = p.map(addWaves(wave2, modWave, 0), -1, 1, 0, rectW);
+      const r2h = p.map(addWaves(wave2, modWave, 0), -1, 1, 0, rectH);
+      const r3w = p.map(addWaves(wave3, modWave, 0), -1, 1, 0, rectW);
+      const r3h = p.map(addWaves(wave3, modWave, 0), -1, 1, 0, rectH);
+      const r4w = p.map(addWaves(wave4, modWave, 0), -1, 1, 0, rectW);
+      const r4h = p.map(addWaves(wave4, modWave, 0), -1, 1, 0, rectH);
+
+      // Draw rects
+      p.rect(rectW / 2, rectH / 2, r1w, r1h);
+      p.rect(rectW * 1.5, rectH / 2, r2w, r2h);
+      p.rect(rectW / 2, rectH * 1.5, r3w, r3h);
+      p.rect(rectW * 1.5, rectH * 1.5, r4w, r4h);
+
+      // Advance Waves
+      wave1.setSpeed(getSpeed1());
+      wave1.tick();
+      wave2.setSpeed(getSpeed2());
+      wave2.tick();
+      wave3.setSpeed(getSpeed3());
+      wave3.tick();
+      wave4.setSpeed(getSpeed4());
+      wave4.tick();
+      modWave.tick();
+    };
+  };
+  return { hydraSketch, p5Sketch };
+};
+
+export const galaxyHydra = () => {
+  const hydraSketch = () => {
+    src(s1)
+      .modulate(osc(() => m.getSlider(7, 1, 50)))
+      .out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const numPoints = 10;
+    const frameRate = 280;
+    // const xyOffset = 10;
+    const getMaxRad = () => m.getSlider(6, 10, 1000);
+    const getStrokeWeight = () => m.getSlider(8, 1, 10);
+    const getXyOffset = () => m.getSlider(9, 2, 100);
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.frameRate(frameRate);
+      // p.noStroke();
+      p.stroke(255);
+    };
+    p.draw = () => {
+      const numCircles = getMaxRad();
+      const maxRad = getMaxRad();
+      const inc = maxRad / numCircles;
+      p.strokeWeight(getStrokeWeight());
+      p.background(0);
+      p.translate(p.width / 2, p.height / 2);
+      for (let i = 0; i < numCircles; i++) {
+        for (let j = 0; j < numPoints; j++) {
+          const rad = (i + 1) * inc;
+          const a = p.random() * 2 * p.PI;
+          const r = rad * p.sqrt(p.random());
+          const x = r * p.cos(a);
+          const y = r * p.sin(a);
+          const xyOffset = getXyOffset();
+          const x2 = p.random(-xyOffset, xyOffset);
+          const y2 = p.random(-xyOffset, xyOffset);
+          // p.square(x, y, 3);
+          p.line(x, y, x + x2, y + y2);
+        }
+      }
+    };
+  };
+
   return { hydraSketch, p5Sketch };
 };

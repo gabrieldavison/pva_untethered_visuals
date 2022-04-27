@@ -3,12 +3,12 @@ export class MyAmp {
     this.p5 = p5;
     this.p = p;
     this.mic = new this.p5.AudioIn();
-    this.mic.start();
     this.amp = new this.p5.Amplitude();
   }
-  start() {
+  setup() {
     this.p.userStartAudio();
     this.amp.setInput(this.mic);
+    this.mic.start();
   }
   getLevel() {
     return this.amp.getLevel();
