@@ -446,6 +446,7 @@ export const rotatingSquares = () => {
   return { hydraSketch, p5Sketch };
 };
 
+// moved
 export const galaxy = () => {
   const hydraSketch = () => {
     // src(s1).modulate(noise(10), 0.1).out(o0);
@@ -764,6 +765,7 @@ export const squaresInSquaresAudioInput = () => {
   };
   return { hydraSketch, p5Sketch };
 };
+
 export const squaresInSquaresFeedback = () => {
   const hydraSketch = () => {
     s0.initCam(0);

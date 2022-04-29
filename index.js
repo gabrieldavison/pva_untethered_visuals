@@ -21,6 +21,19 @@ m.setButton(5, () => initScene(scenes.fourBoxWithSpeedControl));
 m.setButton(6, () => initScene(scenes.fourBoxWithSpeedControlFeedbackAudio));
 m.setButton(7, () => initScene(scenes.fourBoxWithSpeedControlVideoInput));
 m.setButton(8, () => initScene(scenes.galaxyHydra));
+m.setButton(9, () => initScene(scenes.galaxyWithAudioInput));
+m.setButton(10, () => initScene(scenes.galaxyHydraVideoInput));
+m.setButton(11, () => initScene(scenes.rotatingSquares));
+m.setButton(12, () => initScene(scenes.rotatingSquaresBig));
+m.setButton(13, () => initScene(scenes.rotatingSquaresBigHydra));
+m.setButton(14, () => initScene(scenes.rotatingSquaresVideoInput));
+m.setButton(15, () => initScene(scenes.squaresInSquaresAudioSize));
+m.setButton(16, () => initScene(scenes.squaresInSquaresAudioTrigger));
+m.setButton(17, () => initScene(scenes.squaresInSquaresAudioTrigger4));
+m.setButton(18, () => initScene(scenes.squaresInSquaresVideoInput));
+m.setButton(19, () => initScene(scenes.squaresInSquaresHydra));
+m.setButton(20, () => initScene(scenes.moireCirclesHydraVideoInput));
+m.setButton(21, () => initScene(scenes.moireCirclesHydra));
 // // Stand in for midi controller
 // document.addEventListener("keypress", (e) => {
 //   switch (e.key) {
