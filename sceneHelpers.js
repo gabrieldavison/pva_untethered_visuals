@@ -123,7 +123,7 @@ export const genAddWaves =
     );
 
 export class Easer {
-  constructor(x, y) {
+  constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
     this.tx = x;
@@ -137,3 +137,7 @@ export class Easer {
     this.y += dy;
   }
 }
+
+export const hydraInit = (p) => {
+  p.pixelDensity(1);
+};

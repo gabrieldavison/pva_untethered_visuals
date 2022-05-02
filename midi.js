@@ -56,6 +56,7 @@ const ccChange = (e) => {
 
 const noteChange = (e) => {
   const noteNumber = e.data[1];
+  console.log(noteNumber);
   if (buttonMapping.hasOwnProperty(noteNumber)) {
     buttonMapping[noteNumber](e);
   }

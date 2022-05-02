@@ -7,12 +7,10 @@ import {
   Wave,
   genAddWaves,
   Easer,
+  hydraInit,
 } from "./sceneHelpers.js";
 
 // Templates
-const hydraInit = (p) => {
-  p.pixelDensity(1);
-};
 
 // export const parallelLines = () => {
 //   const hydraSketch = () => {
@@ -1197,6 +1195,7 @@ export const squaresInSquaresAudioTrigger = () => {
   };
   return { hydraSketch, p5Sketch };
 };
+
 export const squaresInSquaresAudioTrigger4 = () => {
   const hydraSketch = () => {
     src(s1).out(o0);

@@ -2,16 +2,21 @@ import { initScene } from "./switcher.js";
 import * as scratchScenes from "./scratchScenes.js";
 import * as scenes from "./scenes.js";
 import * as m from "./midi.js";
+import bank1 from "./banks/bank1_boxes.js";
+import bank2 from "./banks/bank2_galaxy.js";
+import bank3 from "./banks/bank3_rotSquares.js";
+import bank4 from "./banks/bank4_squaresInSquares";
 
 // console.log(m.wm);
-window.m = m;
+// window.m = m;
 m.setup();
 window.onload = () => {
   initScene(scratchScenes.init);
 };
 
-let sketchLoaded = false;
-console.log(m.setButton);
+// bank3();
+
+// Scratch mapping
 m.setButton(0, () => initScene(scenes.init));
 m.setButton(1, () => initScene(scenes.twoBoxWithSpeedControl));
 m.setButton(2, () => initScene(scenes.twoBoxWithSpeedControlHydra));
@@ -34,50 +39,3 @@ m.setButton(18, () => initScene(scenes.squaresInSquaresVideoInput));
 m.setButton(19, () => initScene(scenes.squaresInSquaresHydra));
 m.setButton(20, () => initScene(scenes.moireCirclesHydraVideoInput));
 m.setButton(21, () => initScene(scenes.moireCirclesHydra));
-// // Stand in for midi controller
-// document.addEventListener("keypress", (e) => {
-//   switch (e.key) {
-//     case "1":
-//       initScene(scenes.init);
-//       break;
-//     case "2":
-//       initScene(scenes.audioInit);
-//       break;
-//     case "3":
-//       initScene(scenes.oneBoxWithSpeedControl);
-//       break;
-//     case "4":
-//       initScene(scenes.twoBoxWithSpeedControl);
-//       break;
-//     case "5":
-//       initScene(scenes.fourBoxWithSpeedControl);
-//       break;
-//     case "6":
-//       initScene(scenes.oneBoxWithAudioControl);
-//       break;
-//     case "7":
-//       initScene(scenes.rotatingSquares);
-//       break;
-//     case "8":
-//       initScene(scenes.galaxy);
-//       break;
-//     case "9":
-//       initScene(scenes.galaxyWithAudioInput);
-//       break;
-//     case "0":
-//       initScene(scenes.moireCircles);
-//       break;
-//     case "q":
-//       initScene(scenes.moireCirclesWithAudioInput);
-//       break;
-//     case "w":
-//       initScene(scenes.squaresInSquares);
-//       break;
-//     case "e":
-//       initScene(scenes.squaresInSquaresAudioInput);
-//       break;
-//     case "r":
-//       initScene(scenes.moireCircles);
-//       break;
-//   }
-// });
