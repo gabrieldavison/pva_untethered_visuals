@@ -198,6 +198,7 @@ export const twoBox = () => {
   };
   return { hydraSketch, p5Sketch };
 };
+
 export const twoBoxInverted = () => {
   const hydraSketch = boxHydra;
 
@@ -1527,8 +1528,13 @@ export const galaxyVideoInput = () => {
 
     solid(0, 0, 0)
       .layer(src(o1).mask(s1))
-      .modulate(osc(() => m.getSlider(7, 1, 50)))
+      .modulate(osc(() => m.getSlider(3, 1, 50)))
+      .pixelate(
+        () => m.getSlider(2, 1200, 5),
+        () => m.getSlider(2, 1200, 5)
+      )
       .saturate(0)
+      .contrast(1.4)
       .out();
   };
 
@@ -1569,6 +1575,313 @@ export const galaxyVideoInput = () => {
         }
       }
     };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const galaxyWithAudioVideo = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).out(o1);
+
+    solid(0, 0, 0)
+      .layer(src(o1).mask(s1))
+      .modulate(osc(() => m.getSlider(3, 1, 50)))
+      .pixelate(
+        () => m.getSlider(2, 1200, 5),
+        () => m.getSlider(2, 1200, 5)
+      )
+      .saturate(0)
+      .contrast(1.4)
+      .out();
+  };
+
+  const e = new Easer();
+  const p5Sketch = (p) => {
+    const numPoints = 10;
+    const frameRate = 280;
+
+    let amp = new a.MyAmp();
+    const getAmpMult = () => m.getSlider(6, 1, 10);
+    const getInterval = () => m.getSlider(7, 1, 200);
+    const getStrokeWeight = () => m.getSlider(8, 1, 10);
+    const getXyOffset = () => m.getSlider(9, 2, 100);
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.frameRate(frameRate);
+      p.stroke(255);
+    };
+
+    p.draw = () => {
+      const ampMult = getAmpMult();
+      const level = amp.getLevel() * ampMult;
+      e.tx = p.map(level, 0, 1.5, 0, 1000);
+      const numCircles = p.map(e.x, 0, 1000, 0, 250);
+      const maxRad = e.x;
+      const inc = maxRad / numCircles;
+      // p.background(0);
+      p.clear();
+      p.translate(p.width / 2, p.height / 2);
+      p.strokeWeight(getStrokeWeight());
+      for (let i = 0; i < numCircles; i++) {
+        for (let j = 0; j < numPoints; j++) {
+          const rad = (i + 1) * inc;
+          const a = p.random() * 2 * p.PI;
+          const r = rad * p.sqrt(p.random());
+          const x = r * p.cos(a);
+          const y = r * p.sin(a);
+          const xyOffset = getXyOffset();
+          const x2 = p.random(-xyOffset, xyOffset);
+          const y2 = p.random(-xyOffset, xyOffset);
+          p.line(x, y, x + x2, y + y2);
+        }
+      }
+      const interval = getInterval();
+      e.tick(Math.floor(interval));
+    };
+    p.mousePressed = () => {
+      a.start();
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const twoBoxVideo = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).out(o1);
+
+    src(s1)
+      .diff(o1)
+      .modulate(noise(5), () => m.getSlider(2, 0, 0.5))
+      .pixelate(
+        () => m.getSlider(3, 1000, 2),
+        () => m.getSlider(3, 1000, 2)
+      )
+      .saturate(0)
+      .invert()
+      .out();
+  };
+
+  const p5Sketch = (p) => {
+    const getSpeed = () => m.getSlider(6, 0.01, 0.5);
+
+    let wave;
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.fill(0);
+      wave = new Wave(p);
+      p.rectMode(p.CENTER);
+    };
+
+    p.draw = () => {
+      p.background(255);
+
+      // Set up offsets
+
+      const rectW = p.width / 2;
+      const rectH = p.height;
+
+      const r1w = p.map(wave.val(), -1, 1, 0, rectW);
+      const r1h = p.map(wave.val(), -1, 1, 0, rectH);
+      const r2w = p.map(wave.val(), -1, 1, rectW, 0);
+      const r2h = p.map(wave.val(), -1, 1, rectH, 0);
+
+      // Draw rects
+      p.rect(rectW * 0.5, rectH * 0.5, r1w, r1h);
+      p.rect(rectW * 1.5, rectH * 0.5, r2w, r2h);
+
+      // Advance Waves
+      wave.setSpeed(getSpeed());
+      wave.tick();
+    };
+  };
+  return { hydraSketch, p5Sketch };
+};
+
+export const rotSquaresBigVideo = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).out(o1);
+
+    src(s1)
+      .diff(o1)
+      .pixelate(
+        () => m.getSlider(2, 1200, 4),
+        () => m.getSlider(2, 1200, 4)
+      )
+      .modulate(o0, () => m.getSlider(3, 0, 0.7))
+      .contrast(1.5)
+      .saturate(0)
+      .out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const maxSize = 5000;
+    const numSquares = 50; // Up to 5000 looks nice
+    const rotSpeedMin = 0.0005; // can go up and down in factors of 10 but try and keep a big gap between them
+    const rotSpeedMax = 0.001;
+
+    let sqs;
+    let genSquares;
+
+    const getRotSpeedMult = () => m.getSlider(6, 1, 100);
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.rectMode(p.CENTER);
+      p.noStroke();
+
+      genSquares = (maxSize, num) => {
+        const chunk = maxSize / num;
+        const r = (acc, _v, i) => {
+          const size = (i + 1) * chunk;
+          const x = maxSize / 2 - 0.5 * size;
+          const y = maxSize / 2 - 0.5 * size;
+          return [...acc, { size, x, y, rot: p.random(0, 1) }];
+        };
+        return [...Array(num)].reduce(r, []);
+      };
+      sqs = genSquares(maxSize, numSquares).reverse();
+    };
+
+    p.draw = () => {
+      p.background(0);
+      sqs.forEach((sq, i) => {
+        p.push();
+
+        i % 2 === 0 ? p.fill(0) : 255;
+        p.translate(p.width / 2, p.height / 2);
+        p.rotate(sq.rot);
+        p.rect(0, 0, sq.size, sq.size);
+        p.pop();
+
+        const rotSpeedMult = getRotSpeedMult();
+        i % 2 === 0
+          ? (sqs[i].rot += p.random(
+              rotSpeedMin * rotSpeedMult,
+              rotSpeedMax * rotSpeedMult
+            ))
+          : (sqs[i].rot += p.random(
+              -rotSpeedMax * rotSpeedMult,
+              -rotSpeedMin * rotSpeedMult
+            ));
+      });
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const rotSquaresSmallVideo = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).out(o1);
+
+    src(s1)
+      .diff(o1)
+      .pixelate(
+        () => m.getSlider(2, 1200, 4),
+        () => m.getSlider(2, 1200, 4)
+      )
+      .modulate(o0, () => m.getSlider(3, 0, 0.7))
+      .contrast(1.5)
+      .saturate(0)
+      .out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    const maxSize = 5000;
+    const numSquares = 2000; // Up to 5000 looks nice
+    const rotSpeedMin = 0.0005; // can go up and down in factors of 10 but try and keep a big gap between them
+    const rotSpeedMax = 0.001;
+
+    let sqs;
+    let genSquares;
+
+    const getRotSpeedMult = () => m.getSlider(6, 1, 100);
+
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+      p.rectMode(p.CENTER);
+      p.noStroke();
+
+      genSquares = (maxSize, num) => {
+        const chunk = maxSize / num;
+        const r = (acc, _v, i) => {
+          const size = (i + 1) * chunk;
+          const x = maxSize / 2 - 0.5 * size;
+          const y = maxSize / 2 - 0.5 * size;
+          return [...acc, { size, x, y, rot: p.random(0, 1) }];
+        };
+        return [...Array(num)].reduce(r, []);
+      };
+      sqs = genSquares(maxSize, numSquares).reverse();
+    };
+
+    p.draw = () => {
+      p.background(0);
+      sqs.forEach((sq, i) => {
+        p.push();
+
+        i % 2 === 0 ? p.fill(0) : 255;
+        p.translate(p.width / 2, p.height / 2);
+        p.rotate(sq.rot);
+        p.rect(0, 0, sq.size, sq.size);
+        p.pop();
+
+        const rotSpeedMult = getRotSpeedMult();
+        i % 2 === 0
+          ? (sqs[i].rot += p.random(
+              rotSpeedMin * rotSpeedMult,
+              rotSpeedMax * rotSpeedMult
+            ))
+          : (sqs[i].rot += p.random(
+              -rotSpeedMax * rotSpeedMult,
+              -rotSpeedMin * rotSpeedMult
+            ));
+      });
+    };
+  };
+
+  return { hydraSketch, p5Sketch };
+};
+
+export const dirtyCamera = () => {
+  const hydraSketch = () => {
+    s0.initCam(0);
+    src(s0).out(o1);
+
+    src(o1)
+      .pixelate(
+        () => m.getSlider(2, 1200, 4),
+        () => m.getSlider(2, 1200, 4)
+      )
+      .modulate(o0, () => m.getSlider(3, 0, 0.7))
+      .modulateRotate(o0, () => m.getSlider(1, 0, 20), 0)
+      .contrast(1.5)
+      .saturate(0)
+      .out(o0);
+  };
+
+  const p5Sketch = (p) => {
+    p.setup = () => {
+      let cnv = p.createCanvas(p.windowWidth, p.windowHeight);
+      cnv.id("p5-canvas");
+      hydraInit(p);
+    };
+    p.draw = () => {};
   };
 
   return { hydraSketch, p5Sketch };
